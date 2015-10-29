@@ -23,20 +23,40 @@ require 'vendor/autoload.php';
 use Aws\S3\S3Client;
 
 $client = S3Client::factory();
+$s3 = new Aws\S3\S3Client([
+'version' => 'latest',
+'region' => 'us-east-1'
+]);
+
 $bucket = uniqid("php-lsl-",false);
 
-$result = $client->createBucket(array(
+#$result = $client->createBucket(array(
+#'Bucket' => $bucket
+#));
+# AWS PHP SDK version 3 create bucket
+$result = $s3->createBucket([
+'ACL' => 'public-read',
 'Bucket' => $bucket
-));
+)];
 
-$client->waitUntilBucketExists(array('Bucket' => $bucket));
-Skey = $uploadfile;
-$result = $client->putObject(array(
+#$client->waitUntilBucketExists(array('Bucket' => $bucket));
+#Old PHP version 2
+#Skey = $uploadfile;
+#$result = $client->putObject(array(
+#'ACL' => 'public-read',
+#'Bucket' => $bucket,
+#'Key' => $key,
+#'SourceFile' => $uploadfile
+#));
+
+#PHP version 3
+$result = $client->putObject([
 'ACL' => 'public-read',
 'Bucket' => $bucket,
-'Key' => $key,
-'SourceFile' => $uploadfile
-));
+'Key' => $uploadfile
+)];
+
+
 $url = $result['ObjectURL'];
 echo $url;
 
