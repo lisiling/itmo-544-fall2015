@@ -11,22 +11,21 @@ require 'vendor/autoload.php';
 
 use Aws\Rds\RdsClient;
 $client = RdsClient::factory(array(
+'version'=>'latest'
 'region'  => 'us-east-1'
 ));
 
 $result = $client->describeDBInstances(array(
-    'DBInstanceIdentifier' => 'itmo544lsldb',
+    'DBInstanceIdentifier' => 'lsl-db',
 ));
 
-$endpoint = "";
 
-foreach ($result->getPath('DBInstances/*/Endpoint/Address') as $ep) {
-    // Do something with the message
-    echo "============". $ep . "================";
-    $endpoint = $ep;
-}   
-//echo "begin database";
-$link = mysqli_connect($endpoint,"controller","ilovebunnies","itmo544db") or die("Error " . mysqli_error($link));
+$endpoint = $result['DBInstances'][0]['Endpoint']['Address'];
+    echo "============\n". $endpoint . "================";
+
+
+
+$link = mysqli_connect($endpoint,"lisiling","ilovebunnies","itmo544mp1") or die("Error " . mysqli_error($link));
 
 /* check connection */
 if (mysqli_connect_errno()) {
@@ -34,9 +33,8 @@ if (mysqli_connect_errno()) {
     exit();
 }
 
-//below line is unsafe - $email is not checked for SQL injection -- don't do this in real life or use an ORM instead
-$link->real_query("SELECT * FROM items WHERE email = '$email'");
-//$link->real_query("SELECT * FROM items");
+$link->real_query("SELECT * FROM mp1tb WHERE email = '$email'");
+
 $res = $link->use_result();
 echo "Result set order...\n";
 while ($row = $res->fetch_assoc()) {
