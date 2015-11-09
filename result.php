@@ -1,82 +1,57 @@
 <?php
-//Start the session
-session start();
-//In PHP versions earlier than 4.1.0, $HTTP_POST_FILES should be used instead
-//of $_FILES.
 
+session_start();
+$useremail = $_POST["useremail"];
 echo $_POST['useremail'];
-
 $uploaddir = '/tmp/';
 $uploadfile = $uploaddir . basename($_FILES['userfile']['name']);
-
 echo '<pre>';
 if (move_uploaded_file($_FILES['userfile']['tmp_name'], $uploadfile)) {
-echo "File is valid, and was successfully uploaded.\n";
+       echo "File is valid, and was successfully uploaded.\n";}
 else{
-echo "Possible file upload attact!\n";
+echo "Possible file upload attact!\n";}
 
 echo 'Here is some more debugging info:';
 print_r($_FILES);
-
 print "</pre>";
 require 'vendor/autoload.php';
 use Aws\S3\S3Client;
-
-$client = S3Client::factory();
-$s3 = new Aws\S3\S3Client([
+$client = S3Client::factory(array(
 'version' => 'latest',
 'region' => 'us-east-1'
-]);
+));
 
 $bucket = uniqid("php-lsl-",false);
+$result = $client->createBucket(array(
+    'Bucket' => $bucket
+));
 
-#$result = $client->createBucket(array(
-#'Bucket' => $bucket
-#));
-# AWS PHP SDK version 3 create bucket
-$result = $s3->createBucket([
-'ACL' => 'public-read',
-'Bucket' => $bucket
-)];
 
-#$client->waitUntilBucketExists(array('Bucket' => $bucket));
-#Old PHP version 2
-#Skey = $uploadfile;
-#$result = $client->putObject(array(
-#'ACL' => 'public-read',
-#'Bucket' => $bucket,
-#'Key' => $key,
-#'SourceFile' => $uploadfile
-#));
-
-#PHP version 3
-$result = $client->putObject([
+$client->waitUntil('BucketExists',array('Bucket' => $bucket));
+Skey = $uploadfile;
+$result = $client->putObject(array(
 'ACL' => 'public-read',
 'Bucket' => $bucket,
-'Key' => $uploadfile
-)];
+'Key' => $key,
+'SourceFile' => $uploadfile
+));
 
 
 $url = $result['ObjectURL'];
 echo $url;
-
 use Aws\Rds\RdsClient;
 $client = RdsClient::factory(array(
+'version' =>'latest',
 'region' => 'us-east-1'
 ));
-$result = $client->describeDBIntances(array(
-'DBInstanceIdentifier' => 'itmo544lsldb',
-));
 
-$endpoint = "";
+$result = $rds->describeDBInstances([
+   'DBInstanceIdentifier' => 'lsl-db',
 
-foreach ($result->getPath('DBInstances/*/Endpoint/Address') as $ep) {
-//Do something with the message
-echo "============". $ep . "================";
-$endpoint = $ep;
-}
-//echo "begin database";
-$link = mysqli_connect($endpoint,"controller","ilovebunnies","itmo544db") or die("Error" . mysqli_error($link));
+$endpoint = $result['DBInstances'][0]['Endpoint']['Address'];
+    echo "============\n". $endpoint . "================";
+
+$link = mysqli_connect($endpoint,"lisiling","ilovebunnies","itmo544mp1") or die("Error" . mysqli_error($link));
 
 /* check connection */
 if (myaqli_connect_error()) {
@@ -86,12 +61,12 @@ exit();
 
 /* prepared statement, stage 1:prepare */
 if (!($stmt = $link->prepare("INSERT INTO items (id, email, phone, filename, s3finishedurl, status, issubscribed) VALUES (NULL,?,?,?,?,?,?,?)"))){
-echo "Prepare failed: (" . $link->errno . ") . $link->error;
+echo "Prepare failed: (" . $link->errno . ")" . $link->error;
 }
 
 $email = $_POST['useremail'];
 $phone = $_POST['phone'];
-$s3rawurl =$url; // $result['ObjectURL']; from above
+$s3rawurl =$url; 
 $filename = basename($_FILES['userfile']['name']);
 $s3finishedurl = "none";
 $status = 0;
