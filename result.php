@@ -76,7 +76,7 @@ $result = $client->createBucket(array(
 
 
 $client->waitUntil('BucketExists',array('Bucket' => $bucket));
-Skey = $uploadfile;
+$key = $uploadfile;
 $result = $client->putObject(array(
 'ACL' => 'public-read',
 'Bucket' => $bucket,
@@ -87,6 +87,7 @@ $result = $client->putObject(array(
 
 $url = $result['ObjectURL'];
 echo $url;
+
 use Aws\Rds\RdsClient;
 $client = RdsClient::factory(array(
 'version' =>'latest',
@@ -116,9 +117,10 @@ $email = $_POST['useremail'];
 $phone = $_POST['phone'];
 $s3rawurl =$url; 
 $filename = basename($_FILES['userfile']['name']);
-$s3finishedurl = "none";
+$s3finishedurl = $finishedurl;
 $status = 0;
 $issubscribed = 0;
+$password = $_POST["password"];
 
 $stmt->bind_param("sssssii",$email,$phone,$filename,$s3rawurl,$s3finishedurl,$status,$issubscribed);
 
@@ -134,7 +136,7 @@ $stmt->close();
 $link->real_query("SELECT * FROM items");
 $res = $link->use_result();
 
-echo "Result set order...\n";
+echo "Result...\n";
 while ($row = $res->fetch_assoc()) {
 echo $row['id'] . " " . $row['email']. " " . $row['phone'];
 }
