@@ -66,11 +66,10 @@ Enter Email of user for gallery to browse: <input type="email" name="email">
 
 </div>
 
-<!-- 
 <div id="content">
-<a href="introspection.php"><li>Backup databases</li></a>
+<a href="introspection.php"><p>BACKUP DATABASE</p></a>
 </div>
- -->
+
 
 </body>
 </html>
